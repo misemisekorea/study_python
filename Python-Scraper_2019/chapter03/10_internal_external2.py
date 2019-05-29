@@ -1,4 +1,4 @@
-# 외부링크에서 외부링크로 무작위 이동
+# 사이트에서 찾은 외부 URL을 모두 리스트로 수집
 from urllib.request import urlopen
 from urllib.parse import urlparse
 from bs4 import BeautifulSoup
@@ -60,28 +60,39 @@ def getRandomExternalLink(startingPage):
         return externalLinks[random.randint(0, len(externalLinks)-1)]
 
 
-def followExternalOnly(startingSite):
-    print("--------in def followExternalOnly")
-    externalLink = getRandomExternalLink(startingSite)
-    print("Random external link is: " + externalLink)
-    followExternalOnly(externalLink)
-
-followExternalOnly("http://oreilly.com")
-
-
-#2. 사이트에서 찾은 외부 URL을 모두 리스트로 수집
 allExtLinks = set()
 allIntLinks = set()
 
 def getAllExternalLinks(siteUrl):
-    html = url
+    html = urlopen(siteUrl)
+    bsObj = BeautifulSoup(html, "html.parser")
+    internalLinks = getInternalLinks(bsObj, urlparse(siteUrl).netloc) #http://를 제외
+    externalLinks = getExternalLinks(bsObj, urlparse(siteUrl).netloc) #http://를 제외
+
+    for link in externalLinks:
+        if link not in allExtLinks:
+            allExtLinks.add(link)
+            print(link)
+
+    for link in internalLinks:
+        #/일 경우 -> "/"
+        if link == "/":
+            link = domain
+        #//로 시작할 경우 -> "http:"+"//oreilly.com/test"
+        elif link[0:2] == "//":
+            link = "http:" + link
+        #/로 시작할 경우 -> "http://oreilly.com"+"/test"
+        elif link[0:1] == "/":
+            link = domain + link
+
+        if link not in allIntLinks:
+            print("About to get link: " + link)
+            allIntLinks.add(link)
+            getAllExternalLinks(link)
 
 
-
-
-
-
-
+domain = "http://oreilly.com"
+getAllExternalLinks(domain)
 
 
 
