@@ -1,3 +1,4 @@
+#특정 태그 가져오기
 from urllib.request import urlopen
 from urllib.request import HTTPError
 from bs4 import BeautifulSoup
