@@ -13,7 +13,7 @@ random.seed(datetime.datetime.now())
 # 페이지에서 발견된 내부 링크를 모두 목록으로 만듭니다. (뷰티풀수프객체, 도메인)
 def getInternalLinks(bsObj, includeUrl):
     print("--------in def getInternalLinks")
-    includeUrl = urlparse(includeUrl).schme+"://"+urlparse(includeUrl).netloc
+    includeUrl = urlparse(includeUrl).scheme+"://"+urlparse(includeUrl).netloc
     internalLinks = []
 
     #/로 시작하는 링크를 모두 찾습니다.
@@ -22,7 +22,7 @@ def getInternalLinks(bsObj, includeUrl):
         if link.attrs['href'] is not None:
             # internalLinks에 포함되어 있지 않으며
             if link.attrs['href'] not in internalLinks:
-                # /로 시작하면 도메인 + href
+                # /로 시작하는 도메인 + href
                 if(link.attrs['href'].startswith("/")):
                     internalLinks.append(includeUrl+link.attrs['href'])
                 # /로 시작하지 않는 전체주소일 경우
@@ -69,12 +69,6 @@ def followExternalOnly(startingSite):
 followExternalOnly("http://oreilly.com")
 
 
-#2. 사이트에서 찾은 외부 URL을 모두 리스트로 수집
-allExtLinks = set()
-allIntLinks = set()
-
-def getAllExternalLinks(siteUrl):
-    html = url
 
 
 

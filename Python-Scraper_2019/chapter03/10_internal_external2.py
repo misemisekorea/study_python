@@ -1,5 +1,6 @@
 # 사이트에서 찾은 외부 URL을 모두 리스트로 수집
 from urllib.request import urlopen
+from urllib.request import HTTPError
 from urllib.parse import urlparse
 from bs4 import BeautifulSoup
 import re
@@ -13,7 +14,7 @@ random.seed(datetime.datetime.now())
 # 페이지에서 발견된 내부 링크를 모두 목록으로 만듭니다. (뷰티풀수프객체, 도메인)
 def getInternalLinks(bsObj, includeUrl):
     print("--------in def getInternalLinks")
-    includeUrl = urlparse(includeUrl).schme+"://"+urlparse(includeUrl).netloc
+    includeUrl = urlparse(includeUrl).scheme+"://"+urlparse(includeUrl).netloc
     internalLinks = []
 
     #/로 시작하는 링크를 모두 찾습니다.
@@ -22,7 +23,7 @@ def getInternalLinks(bsObj, includeUrl):
         if link.attrs['href'] is not None:
             # internalLinks에 포함되어 있지 않으며
             if link.attrs['href'] not in internalLinks:
-                # /로 시작하면 도메인 + href
+                # /로 시작하는 도메인 + href
                 if(link.attrs['href'].startswith("/")):
                     internalLinks.append(includeUrl+link.attrs['href'])
                 # /로 시작하지 않는 전체주소일 경우
@@ -46,28 +47,19 @@ def getExternalLinks(bsObj, excludeUrl):
     return externalLinks
 
 
-
-def getRandomExternalLink(startingPage):
-    print("--------in def getRandomExternalLink")
-    html = urlopen(startingPage)
-    bsObj = BeautifulSoup(html, "html.parser")
-    externalLinks = getExternalLinks(bsObj, urlparse(startingPage).netloc)
-    if len(externalLinks) == 0:
-        domain = urlparse(startingPage).scheme+"://"+urlparse(startingPage).netloc
-        internalLinks = getInternalLinks(bsObj, domain)
-        return getRandomExternalLink(internalLinks[random.randint(0,len(internalLinks)-1)])
-    else:
-        return externalLinks[random.randint(0, len(externalLinks)-1)]
-
-
 allExtLinks = set()
 allIntLinks = set()
 
 def getAllExternalLinks(siteUrl):
-    html = urlopen(siteUrl)
+    try:
+        html = urlopen(siteUrl)
+    except HTTPError as e:
+        print(e)
+        return None
+
     bsObj = BeautifulSoup(html, "html.parser")
-    internalLinks = getInternalLinks(bsObj, urlparse(siteUrl).netloc) #http://를 제외
-    externalLinks = getExternalLinks(bsObj, urlparse(siteUrl).netloc) #http://를 제외
+    internalLinks = getInternalLinks(bsObj, siteUrl)
+    externalLinks = getExternalLinks(bsObj, siteUrl)
 
     for link in externalLinks:
         if link not in allExtLinks:
@@ -93,13 +85,6 @@ def getAllExternalLinks(siteUrl):
 
 domain = "http://oreilly.com"
 getAllExternalLinks(domain)
-
-
-
-
-
-
-
 
 
 
